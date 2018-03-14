@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -17,7 +19,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
-import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -114,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         String personEmail = "";
         String personId = "";
         String personPhoto = "";
+        StringBuilder sb;
 
         if (signInAccount != null) {
             personName = signInAccount.getDisplayName();
@@ -121,18 +123,25 @@ public class MainActivity extends AppCompatActivity {
             personFamilyName = signInAccount.getFamilyName();
             personEmail = signInAccount.getEmail();
             personId = signInAccount.getId();
-            personPhoto = signInAccount.getPhotoUrl().toString();
 
-            Picasso.get()
+            sb = new StringBuilder(signInAccount.getPhotoUrl().toString());
+            personPhoto = sb.deleteCharAt(4).toString();
+
+            Log.d(TAG, "updateUI.personPhoto: " + personPhoto);
+
+            RequestOptions options = new RequestOptions();
+            options.circleCrop();
+
+            Glide.with(this)
                     .load(personPhoto)
-                    .error(R.drawable.common_google_signin_btn_icon_dark_normal)
-                    .resize(100, 100)
+                    .apply(options)
                     .into(ivPhoto);
 
             Toast.makeText(this, personName + " signed in", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Failed to sign in", Toast.LENGTH_SHORT).show();
         }
 
-        Toast.makeText(this, "Failed to sign in", Toast.LENGTH_SHORT).show();
 
         tvName.setText(personName);
         tvGivenName.setText(personGivenName);
