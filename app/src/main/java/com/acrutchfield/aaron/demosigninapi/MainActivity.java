@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (resultCode == REQUEST_CODE_SIGN_IN) {
+        if (requestCode == REQUEST_CODE_SIGN_IN) {
             Task<GoogleSignInAccount> signInAccountTask =
                     GoogleSignIn.getSignedInAccountFromIntent(intent);
             handleSignInResult(signInAccountTask);
