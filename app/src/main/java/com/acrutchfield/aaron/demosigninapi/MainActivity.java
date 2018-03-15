@@ -1,11 +1,12 @@
 package com.acrutchfield.aaron.demosigninapi;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
         // TODO (9): Customize the size of the button
         SignInButton signInButton = findViewById(R.id.btn_sign_in);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
+
+        Button signOutButton = findViewById(R.id.btn_sign_out);
+        signOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                signOut();
+            }
+        });
 
         // TODO (10): Sign in when the button is clicked
         signInButton.setOnClickListener(new View.OnClickListener() {
@@ -86,6 +96,17 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(signInIntent, REQUEST_CODE_SIGN_IN);
     }
 
+    private void signOut() {
+        mGoogleSignInClient.signOut()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Toast.makeText(MainActivity.this, "Signed out", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        updateUI(null);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
@@ -117,6 +138,9 @@ public class MainActivity extends AppCompatActivity {
         String personPhoto = "";
         StringBuilder sb;
 
+        RequestOptions options = new RequestOptions();
+        options.circleCrop();
+
         if (signInAccount != null) {
             personName = signInAccount.getDisplayName();
             personGivenName = signInAccount.getGivenName();
@@ -129,9 +153,6 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d(TAG, "updateUI.personPhoto: " + personPhoto);
 
-            RequestOptions options = new RequestOptions();
-            options.circleCrop();
-
             Glide.with(this)
                     .load(personPhoto)
                     .apply(options)
@@ -139,9 +160,12 @@ public class MainActivity extends AppCompatActivity {
 
             Toast.makeText(this, personName + " signed in", Toast.LENGTH_SHORT).show();
         } else {
+            Glide.with(this)
+                    .load(R.drawable.common_google_signin_btn_icon_dark)
+                    .apply(options)
+                    .into(ivPhoto);
             Toast.makeText(this, "Failed to sign in", Toast.LENGTH_SHORT).show();
         }
-
 
         tvName.setText(personName);
         tvGivenName.setText(personGivenName);
@@ -150,9 +174,5 @@ public class MainActivity extends AppCompatActivity {
         tvID.setText(personId);
 
         Log.d(TAG, "updateUI: photoUri: " + personPhoto);
-
-
-
-
     }
 }
